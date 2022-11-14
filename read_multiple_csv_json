@@ -1,0 +1,20 @@
+#Read multiple csv files from folder
+#write multiple json files in the folder
+
+import csv
+import os
+import json
+import glob 
+
+for file in glob.iglob('schema_files_csv/*.csv'):
+    bq_tab_schema = []
+    with open(file, 'r') as csv_file:
+        csv_json = csv.DictReader(csv_file)
+        for row in csv_json:
+            bq_tab_schema.append({'name': row['COLUMN_NAME'], 'type': row['TGT_DATA_TYPE'], 'mode': 'NULLABLE'})
+        bq_tab_schema.append({'name': "LOAD_JOB_ID", 'type': "STRING", 'mode': 'NULLABLE'})
+        bq_tab_schema.append({'name': "LOAD_JOB_DATE", 'type': "DATE", 'mode': 'NULLABLE'})
+
+    json_file_name = os.path.basename(file).split('.')[0] + '_schema.json'
+    with open('schema_files_json/'+json_file_name, 'w') as json_file:
+        json_file.write(json.dumps(bq_tab_schema, indent=2))
